@@ -112,6 +112,6 @@ En este directorio dejamos a disposición todos los artefactos que conforman nue
 
 ---
 
-## 5. Conclusión del Equipo
+## 5. Conclusión
 
 Consideramos que el modelo propuesto responde con precisión a todos los requerimientos funcionales y no funcionales planteados en la consigna. La aplicación combinada de **Polimorfismo / Factory Method** para la autoría y el patrón **Strategy** para la integración de LLMs garantiza una arquitectura desacoplada, testeable y preparada para evolucionar hacia la etapa de implementación.
