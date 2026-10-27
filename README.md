@@ -2,7 +2,6 @@
 ## Plataforma Colaborativa de Preguntas y Respuestas (Q&A)
 
 > **Materia:** Ingeniería de Software I (3385) — Universidad Nacional de Río Cuarto (UNRC)  
-> **Área:** Taller de Desarrollo / Trabajo Práctico Integrador  
 > **Tema:** Modelo de Clases Conceptual, Polimorfismo, Patrón Strategy y Factory Method de Autoría.  
 > **Entrega:** Diagrama UML y Justificación de Patrones de Diseño.
 
