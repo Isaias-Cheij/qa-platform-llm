@@ -7,8 +7,8 @@
 
 ## Integrantes del Equipo
 * **Isaías Cheij**
-* **Joaquín**
-* **Juan**
+* **Joaquín Nacis**
+* **Juan Leanza**
 
 ---
 
