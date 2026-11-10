@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio — Plataforma Q&A{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Plataforma Colaborativa Q&A</h1>
+  <p>
+    Espacio de intercambio de conocimientos con asistencia de inteligencia artificial
+    para la comunidad de Ingeniería de Software I.
+  </p>
+  <div class="hero-actions">
+    <a href="#preguntas" class="btn btn-primary">Ver Preguntas</a>
+    <a href="#nueva-pregunta" class="btn btn-secondary">Hacer una Pregunta</a>
+  </div>
+</section>
+
+<section class="features-grid">
+  <article class="card">
+    <h3>Comunidad de Estudiantes</h3>
+    <p>
+      Plantea dudas sobre la materia y participa debatiendo soluciones
+      con tus compañeros a través de votos y comentarios.
+    </p>
+  </article>
+
+  <article class="card">
+    <h3>Asistencia con IA</h3>
+    <p>
+      Respuestas automáticas generadas por agentes de lenguaje integrados,
+      diseñados bajo el patrón Strategy para apoyar el aprendizaje.
+    </p>
+  </article>
+
+  <article class="card">
+    <h3>Soluciones Aceptadas</h3>
+    <p>
+      El autor de cada consulta puede destacar la respuesta más clara y precisa,
+      sirviendo de referencia para toda la comunidad académica.
+    </p>
+  </article>
+</section>
+{% endblock %}
