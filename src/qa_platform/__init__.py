@@ -1,5 +1,6 @@
 import os
-from flask import Flask
+
+from flask import Flask, render_template
 
 from qa_platform.config import Config, config
 
@@ -19,13 +20,9 @@ def create_app(config_name=None):
 
     app.config.from_object(config_class)
 
-    # Ruta inicial para validar que el scaffold responde correctamente
+    # Ruta inicial: renderiza la vista de bienvenida con la plantilla base
     @app.route("/")
     def index():
-        return {
-            "name": "Plataforma Q&A con LLM",
-            "status": "running",
-            "environment": config_name if isinstance(config_name, str) else "custom",
-        }
+        return render_template("index.html")
 
     return app

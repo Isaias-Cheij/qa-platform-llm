@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Plataforma Q&A{% endblock %}</title>
+
+  <!-- Hoja de estilos principal vinculada dinámicamente -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Barra de navegación superior compartida -->
+  <header class="header-nav">
+    <div class="container nav-content">
+      <a href="{{ url_for('index') }}" class="brand-logo">Plataforma Q&A</a>
+      <nav class="nav-links">
+        <a href="{{ url_for('index') }}" class="nav-item">Inicio</a>
+        <a href="#preguntas" class="nav-item">Preguntas</a>
+        <a href="#comunidad" class="nav-item">Comunidad</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mensajes de notificación / flash de Flask -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container flash-container">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Bloque principal de contenido a sobrescribir por cada vista -->
+  <main class="container main-container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Pie de página de la aplicación -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>&copy; 2026 Plataforma Q&A — Ingeniería de Software I (UNRC)</p>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
