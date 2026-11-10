@@ -1,0 +1,18 @@
+[project]
+name = "qa-platform"
+version = "0.1.0"
+description = "Plataforma Colaborativa de Preguntas y Respuestas (Q&A) con Asistencia LLM"
+readme = "README.md"
+authors = [
+    { name = "Isaías Cheij", email = "cheijisaiasuni@gmail.com" },
+    { name = "Joaquín Nacis", email = "joaquinnacis@gmail.com" },
+    { name = "Juan Leanza", email = "juanleanza135@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"
