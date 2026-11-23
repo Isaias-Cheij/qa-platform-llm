@@ -3,22 +3,38 @@ import os
 from flask import Flask, render_template
 
 from qa_platform.config import Config, config
+from qa_platform.extensions import db
 
 
 def create_app(config_name=None):
-    """Application Factory para crear y configurar la instancia de Flask."""
+    """Application Factory para crear y configurar la instancia de Flask.
+
+    Args:
+        config_name: Nombre del entorno (``'development'``, ``'testing'``,
+            ``'production'``) o una clase de configuracion directamente.
+            Si es ``None`` se lee la variable de entorno ``APP_ENV``; si
+            tampoco existe se usa ``'development'``.
+
+    Returns:
+        Instancia de ``flask.Flask`` completamente configurada e inicializada.
+    """
     if config_name is None:
         config_name = os.getenv("APP_ENV", "development")
 
     app = Flask(__name__)
 
-    # Cargar configuración desde clase o string de entorno
+    # Cargar configuracion desde clase o string de entorno
     if isinstance(config_name, str):
         config_class = config.get(config_name, Config)
     else:
         config_class = config_name
 
     app.config.from_object(config_class)
+
+    # Vincular extensiones a esta instancia concreta de la app.
+    # Se hace aqui (y no al instanciar) para respetar el patron Application
+    # Factory y evitar importaciones circulares entre modelos y la app.
+    db.init_app(app)
 
     # Ruta inicial: renderiza la vista de bienvenida con la plantilla base
     @app.route("/")
