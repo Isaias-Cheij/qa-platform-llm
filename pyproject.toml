@@ -11,6 +11,7 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1.0",
+    "flask-sqlalchemy>=3.1.0",
 ]
 
 [build-system]
