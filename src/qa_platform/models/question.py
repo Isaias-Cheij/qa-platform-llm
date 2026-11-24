@@ -84,6 +84,20 @@ class Question(db.Model):
         lazy="dynamic",
         cascade="all, delete-orphan",
     )
+    votes = db.relationship(
+        "Vote",
+        back_populates="question",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
+
+    def calculate_score(self) -> int:
+        """Calcula la puntuación neta de la pregunta sumando sus votos.
+
+        Returns:
+            Suma entera de los valores (+1 / -1) de todos los votos asociados.
+        """
+        return sum(vote.value for vote in self.votes)
 
     def __repr__(self) -> str:
         """Devuelve una representación legible de la pregunta para depuración.

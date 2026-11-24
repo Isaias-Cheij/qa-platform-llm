@@ -70,6 +70,12 @@ class Answer(db.Model):
         back_populates="answers",
         foreign_keys=[author_id],
     )
+    votes = db.relationship(
+        "Vote",
+        back_populates="answer",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
 
     def __init__(
         self,
@@ -151,6 +157,14 @@ class Answer(db.Model):
             Instancia concreta de ``Author`` (usuario humano o ``AIAgent``).
         """
         return self.author
+
+    def calculate_score(self) -> int:
+        """Calcula la puntuación neta de la respuesta sumando sus votos.
+
+        Returns:
+            Suma entera de los valores (+1 / -1) de todos los votos asociados.
+        """
+        return sum(vote.value for vote in self.votes)
 
     def __repr__(self) -> str:
         """Devuelve una representación legible de la respuesta para depuración.

@@ -10,6 +10,7 @@ from qa_platform.models.author import Admin, AIAgent, Author, GeneralUser, User
 from qa_platform.models.category import Category
 from qa_platform.models.question import Question
 from qa_platform.models.tag import Tag, question_tags
+from qa_platform.models.vote import Vote
 
 __all__ = [
     "Admin",
@@ -22,4 +23,5 @@ __all__ = [
     "Tag",
     "question_tags",
     "Question",
+    "Vote",
 ]
