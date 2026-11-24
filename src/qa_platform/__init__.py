@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template
 
 from qa_platform.config import Config, config
-from qa_platform.extensions import db
+from qa_platform.extensions import db, migrate
 
 
 def create_app(config_name=None):
@@ -35,7 +35,8 @@ def create_app(config_name=None):
     # Se hace aqui (y no al instanciar) para respetar el patron Application
     # Factory y evitar importaciones circulares entre modelos y la app.
     db.init_app(app)
-
+    migrate.init_app(app, db)
+    from qa_platform import models  # noqa: F401
     from qa_platform.api.health import health_bp
 
     app.register_blueprint(health_bp)
