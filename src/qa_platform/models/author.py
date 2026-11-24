@@ -47,6 +47,13 @@ class Author(db.Model):
         default=lambda: datetime.now(UTC),
     )
 
+    questions = db.relationship(
+        "Question",
+        back_populates="author",
+        lazy="dynamic",
+        foreign_keys="Question.user_id",
+    )
+
     __mapper_args__ = {
         "polymorphic_on": "author_type",
         "polymorphic_identity": "author",

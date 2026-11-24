@@ -1,10 +1,23 @@
 """Paquete de modelos de dominio de qa-platform.
 
-Importar los modelos aquí garantiza que SQLAlchemy los registre en su
+Importar los modelos aqui garantiza que SQLAlchemy los registre en su
 metadata antes de que se ejecute ``db.create_all()`` o Alembic detecte
 cambios de esquema.
 """
 
 from qa_platform.models.author import Admin, AIAgent, Author, GeneralUser, User
+from qa_platform.models.category import Category
+from qa_platform.models.question import Question
+from qa_platform.models.tag import Tag, question_tags
 
-__all__ = ["Admin", "AIAgent", "Author", "GeneralUser", "User"]
+__all__ = [
+    "Admin",
+    "AIAgent",
+    "Author",
+    "GeneralUser",
+    "User",
+    "Category",
+    "Tag",
+    "question_tags",
+    "Question",
+]
