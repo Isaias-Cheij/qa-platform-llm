@@ -78,6 +78,12 @@ class Question(db.Model):
         back_populates="questions",
         lazy="dynamic",
     )
+    answers = db.relationship(
+        "Answer",
+        back_populates="question",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self) -> str:
         """Devuelve una representación legible de la pregunta para depuración.

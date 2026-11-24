@@ -53,6 +53,12 @@ class Author(db.Model):
         lazy="dynamic",
         foreign_keys="Question.user_id",
     )
+    answers = db.relationship(
+        "Answer",
+        back_populates="author",
+        lazy="dynamic",
+        foreign_keys="Answer.author_id",
+    )
 
     __mapper_args__ = {
         "polymorphic_on": "author_type",
