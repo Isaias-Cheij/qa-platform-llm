@@ -17,9 +17,7 @@ class DevelopmentConfig(Config):
     """Configuracion para desarrollo local."""
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///qa_platform_dev.db"
-    )
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///qa_platform_dev.db")
 
 
 class TestingConfig(Config):
@@ -42,4 +40,3 @@ config = {
     "production": ProductionConfig,
     "default": DevelopmentConfig,
 }
-
