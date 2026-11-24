@@ -36,6 +36,10 @@ def create_app(config_name=None):
     # Factory y evitar importaciones circulares entre modelos y la app.
     db.init_app(app)
 
+    from qa_platform.api.health import health_bp
+
+    app.register_blueprint(health_bp)
+
     # Ruta inicial: renderiza la vista de bienvenida con la plantilla base
     @app.route("/")
     def index():
