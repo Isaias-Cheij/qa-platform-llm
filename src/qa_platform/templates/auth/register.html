@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse — Plataforma Q&A{% endblock %}
+
+{% block content %}
+<section class="auth-card card">
+  <h1>Crear cuenta</h1>
+  <p class="auth-subtitle">Registrate con tu correo para hacer preguntas y participar en la comunidad.</p>
+
+  <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form">
+    <div class="form-group">
+      <label for="username">Nombre de usuario <span aria-hidden="true">*</span></label>
+      <input
+        type="text"
+        id="username"
+        name="username"
+        class="form-control"
+        value="{{ form_data.get('username', '') }}"
+        autocomplete="username"
+        autocorrect="off"
+        autocapitalize="none"
+        spellcheck="false"
+        minlength="3"
+        maxlength="80"
+        enterkeyhint="next"
+        aria-describedby="username-hint{% if errors.get('username') %} username-error{% endif %}"
+        {% if errors.get('username') %}aria-invalid="true"{% endif %}
+        required
+      >
+      <span id="username-hint" class="form-hint">Entre 3 y 80 caracteres.</span>
+      {% if errors.get('username') %}
+        <span id="username-error" class="form-error" role="alert">{{ errors.get('username') }}</span>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="display_name">Nombre visible</label>
+      <input
+        type="text"
+        id="display_name"
+        name="display_name"
+        class="form-control"
+        value="{{ form_data.get('display_name', '') }}"
+        autocomplete="name"
+        maxlength="120"
+        enterkeyhint="next"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="email">Correo electrónico <span aria-hidden="true">*</span></label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        class="form-control"
+        value="{{ form_data.get('email', '') }}"
+        autocomplete="email"
+        spellcheck="false"
+        maxlength="120"
+        enterkeyhint="next"
+        {% if errors.get('email') %}aria-invalid="true" aria-describedby="email-error"{% endif %}
+        required
+      >
+      {% if errors.get('email') %}
+        <span id="email-error" class="form-error" role="alert">{{ errors.get('email') }}</span>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="password">Contraseña <span aria-hidden="true">*</span></label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        class="form-control"
+        autocomplete="new-password"
+        minlength="8"
+        enterkeyhint="next"
+        aria-describedby="password-hint{% if errors.get('password') %} password-error{% endif %}"
+        {% if errors.get('password') %}aria-invalid="true"{% endif %}
+        required
+      >
+      <span id="password-hint" class="form-hint">Mínimo 8 caracteres.</span>
+      {% if errors.get('password') %}
+        <span id="password-error" class="form-error" role="alert">{{ errors.get('password') }}</span>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="academic_level">Nivel académico</label>
+      <input
+        type="text"
+        id="academic_level"
+        name="academic_level"
+        class="form-control"
+        value="{{ form_data.get('academic_level', '') }}"
+        maxlength="80"
+        enterkeyhint="done"
+        aria-describedby="academic-hint"
+      >
+      <span id="academic-hint" class="form-hint">Opcional (ej. Grado, Posgrado).</span>
+    </div>
+
+    <button type="submit" class="btn btn-primary auth-submit">Crear cuenta</button>
+  </form>
+
+  <p class="auth-footer">
+    ¿Ya tenés cuenta? <a href="{{ url_for('auth.login') }}">Iniciar sesión</a>
+  </p>
+</section>
+{% endblock %}

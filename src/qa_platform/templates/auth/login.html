@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión — Plataforma Q&A{% endblock %}
+
+{% block content %}
+<section class="auth-card card">
+  <h1>Iniciar sesión</h1>
+  <p class="auth-subtitle">Ingresá con tu correo electrónico y contraseña.</p>
+
+  <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
+    {% if next_url %}
+      <input type="hidden" name="next" value="{{ next_url }}">
+    {% endif %}
+
+    <div class="form-group">
+      <label for="email">Correo electrónico <span aria-hidden="true">*</span></label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        class="form-control"
+        value="{{ form_data.get('email', '') }}"
+        autocomplete="username"
+        spellcheck="false"
+        enterkeyhint="next"
+        {% if errors.get('general') %}aria-invalid="true"{% endif %}
+        required
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="password">Contraseña <span aria-hidden="true">*</span></label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        class="form-control"
+        autocomplete="current-password"
+        enterkeyhint="done"
+        {% if errors.get('general') %}aria-invalid="true"{% endif %}
+        required
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary auth-submit">Iniciar sesión</button>
+  </form>
+
+  <p class="auth-footer">
+    ¿Todavía no tenés cuenta? <a href="{{ url_for('auth.register') }}">Crear cuenta</a>
+  </p>
+</section>
+{% endblock %}
