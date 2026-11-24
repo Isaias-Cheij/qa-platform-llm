@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Mi perfil — Plataforma Q&A{% endblock %}
+
+{% block content %}
+<section class="auth-card card">
+  <h1>{{ user.display_name }}</h1>
+  <p class="auth-subtitle">Sesión iniciada en Plataforma Q&A</p>
+
+  <dl class="profile-details">
+    <div class="profile-row">
+      <dt>Usuario</dt>
+      <dd>{{ user.username }}</dd>
+    </div>
+    <div class="profile-row">
+      <dt>Correo electrónico</dt>
+      <dd>{{ user.email }}</dd>
+    </div>
+    <div class="profile-row">
+      <dt>Reputación</dt>
+      <dd>{{ user.reputation or 0 }}</dd>
+    </div>
+    {% if user.academic_level %}
+      <div class="profile-row">
+        <dt>Nivel académico</dt>
+        <dd>{{ user.academic_level }}</dd>
+      </div>
+    {% endif %}
+  </dl>
+
+  <form action="{{ url_for('auth.logout') }}" method="POST" class="auth-form">
+    <button type="submit" class="btn btn-secondary auth-submit">Cerrar sesión</button>
+  </form>
+</section>
+{% endblock %}

@@ -19,6 +19,15 @@
         <a href="{{ url_for('index') }}" class="nav-item">Inicio</a>
         <a href="#preguntas" class="nav-item">Preguntas</a>
         <a href="#comunidad" class="nav-item">Comunidad</a>
+        {% if current_user %}
+          <a href="{{ url_for('auth.profile') }}" class="nav-item">{{ current_user.display_name }}</a>
+          <form action="{{ url_for('auth.logout') }}" method="POST" class="nav-logout-form">
+            <button type="submit" class="nav-item nav-logout-btn">Cerrar sesión</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="nav-item">Iniciar sesión</a>
+          <a href="{{ url_for('auth.register') }}" class="nav-item nav-cta">Registrarse</a>
+        {% endif %}
       </nav>
     </div>
   </header>
