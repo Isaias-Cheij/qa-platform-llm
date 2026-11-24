@@ -34,4 +34,71 @@
     {% endif %}
   </div>
 </article>
+
+<section class="answers-section">
+  <h2>Respuestas ({{ answers|length }})</h2>
+
+  {% if answers %}
+    <div class="answer-list">
+      {% for answer in answers %}
+        <article class="answer-card {% if answer.is_accepted %}answer-card--accepted{% endif %}" id="answer-{{ answer.id }}">
+          <div class="answer-meta">
+            {% if answer.is_accepted %}
+              <span class="badge-accepted">✓ Solución aceptada</span>
+            {% endif %}
+            <span class="meta-author">
+              {{ answer.author.display_name }}
+              {% if answer.author.is_agent() %}
+                <span class="badge-ai">IA</span>
+              {% endif %}
+            </span>
+            <span class="meta-date">{{ answer.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+            <span class="answer-score">Puntaje: {{ answer.calculate_score() }}</span>
+          </div>
+
+          <div class="answer-body">{{ answer.body }}</div>
+
+          {% if current_user and question.user_id == current_user.id and not answer.is_accepted %}
+            <div class="answer-actions">
+              <form action="{{ url_for('answers.accept_answer', answer_id=answer.id) }}" method="post" class="accept-answer-form">
+                <button type="submit" class="btn btn-accept">Marcar como aceptada</button>
+              </form>
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty-state">Todavía no hay respuestas para esta pregunta. ¡Sé el primero en responder!</p>
+  {% endif %}
+</section>
+
+<section class="answer-form-section">
+  <h2>Tu respuesta</h2>
+
+  {% if current_user %}
+    <form action="{{ url_for('answers.create_answer', slug=question.slug) }}" method="post" class="answer-form">
+      <div class="form-group">
+        <label for="answer-body">Contenido de la respuesta</label>
+        <textarea
+          id="answer-body"
+          name="body"
+          rows="5"
+          class="form-control"
+          required
+          {% if answer_errors and answer_errors.get('body') %}aria-invalid="true"{% endif %}
+        >{{ answer_body or '' }}</textarea>
+        {% if answer_errors and answer_errors.get('body') %}
+          <span class="form-error">{{ answer_errors.get('body') }}</span>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary">Publicar respuesta</button>
+    </form>
+  {% else %}
+    <p class="answer-login-prompt">
+      Para publicar una respuesta,
+      <a href="{{ url_for('auth.login', next=url_for('questions.question_detail', slug=question.slug)) }}">iniciá sesión</a>.
+    </p>
+  {% endif %}
+</section>
 {% endblock %}
