@@ -45,11 +45,13 @@ class TestUserModel:
     """Pruebas de integracion para el modelo User."""
 
     def test_tables_are_created(self, db):
-        """Verifica que la tabla 'users' existe en la base de datos de prueba."""
+        """Verifica que la tabla 'authors' existe y 'users' fue reemplazada."""
         from sqlalchemy import inspect
 
         inspector = inspect(db.engine)
-        assert "users" in inspector.get_table_names()
+        table_names = inspector.get_table_names()
+        assert "authors" in table_names
+        assert "users" not in table_names
 
     def test_create_and_persist_user(self, db):
         """Verifica que un User se puede instanciar y persistir correctamente."""
