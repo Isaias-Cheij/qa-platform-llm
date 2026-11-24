@@ -17,6 +17,7 @@ from qa_platform.extensions import db
 from qa_platform.models.category import Category
 from qa_platform.models.question import Question
 from qa_platform.models.tag import Tag
+from qa_platform.web.answers import get_ordered_answers
 from qa_platform.web.auth import login_required
 
 questions_bp = Blueprint("questions", __name__, url_prefix="/questions")
@@ -96,7 +97,13 @@ def question_detail(slug: str) -> Any:
     question = db.session.scalar(db.select(Question).filter_by(slug=slug))
     if question is None:
         return render_template("404.html"), 404
-    return render_template("questions/detail.html", question=question)
+    return render_template(
+        "questions/detail.html",
+        question=question,
+        answers=get_ordered_answers(question),
+        answer_errors={},
+        answer_body="",
+    )
 
 
 @questions_bp.route("/new", methods=("GET", "POST"))

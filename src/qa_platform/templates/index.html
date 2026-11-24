@@ -10,8 +10,8 @@
     para la comunidad de Ingeniería de Software I.
   </p>
   <div class="hero-actions">
-    <a href="#preguntas" class="btn btn-primary">Ver Preguntas</a>
-    <a href="#nueva-pregunta" class="btn btn-secondary">Hacer una Pregunta</a>
+    <a href="{{ url_for('questions.list_questions') }}" class="btn btn-primary">Ver Preguntas</a>
+    <a href="{{ url_for('questions.create_question') }}" class="btn btn-secondary">Hacer una Pregunta</a>
   </div>
 </section>
 
