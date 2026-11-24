@@ -39,9 +39,11 @@ def create_app(config_name=None):
     from qa_platform import models  # noqa: F401
     from qa_platform.api.health import health_bp
     from qa_platform.web.auth import auth_bp
+    from qa_platform.web.questions import questions_bp
 
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(questions_bp)
 
     # Ruta inicial: renderiza la vista de bienvenida con la plantilla base
     @app.route("/")

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 text center">
+    <h1 class="display-4">404</h1>
+    <h2>Pagina no encontrada</h2>
+    <p class="lead">La pregunta o recurso que estás buscando no existe o fue movido.</p>
+    <a href="{{ url_for ('questions.list_questions') }}" class="btn btn-primary mt-3">
+            volver al inicio de preguntas
+    </a>
+</div>
+{% endblock %}

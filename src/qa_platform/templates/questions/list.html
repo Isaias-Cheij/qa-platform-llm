@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Preguntas — Plataforma Q&A{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Preguntas</h1>
+  <a href="{{ url_for('questions.create_question') }}" class="btn btn-primary">Hacer una pregunta</a>
+</div>
+
+{% if questions %}
+  <ul class="question-list">
+    {% for q in questions %}
+    <li class="question-card">
+      <h2 class="question-title">
+        <a href="{{ url_for('questions.question_detail', slug=q.slug) }}">{{ q.title }}</a>
+      </h2>
+      <div class="question-meta">
+        <span class="meta-category">{{ q.category.name }}</span>
+        {% set tag_list = q.tags.all() %}
+        {% if tag_list %}
+          <span class="meta-tags">
+            {% for tag in tag_list %}
+              <span class="tag">{{ tag.name }}</span>
+            {% endfor %}
+          </span>
+        {% endif %}
+        <span class="meta-date">{{ q.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+        {% if q.author %}
+          <span class="meta-author">por {{ q.author.display_name }}</span>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="empty-state">Todavia no hay preguntas. <a href="{{ url_for('questions.create_question') }}">Se el primero en preguntar</a>.</p>
+{% endif %}
+{% endblock %}

@@ -289,16 +289,23 @@ class TestAuthWebRoutes:
     def test_login_required_protects_publication_route_and_redirects_back(
         self, app, client, db
     ):
-        """Una ruta de publicación protegida exige login y respeta el parámetro next."""
+        """Una ruta de publicación protegida exige login y respeta el parámetro next.
 
-        @app.route("/questions/new", methods=("GET", "POST"))
+        Usa un endpoint stub propio (/stub/publish) para verificar el
+        comportamiento del decorador login_required de forma aislada, sin
+        depender de la implementacion real de /questions/new (que ya esta
+        registrada por questions_bp y aplica validaciones adicionales).
+        """
+
+        @app.route("/stub/publish", methods=("GET", "POST"))
         @login_required
-        def create_question_stub():
+        def publish_stub():
             return {"created": True}, 201
 
-        anon_post = client.post("/questions/new")
+        # Un usuario anonimo debe ser redirigido al login conservando el next.
+        anon_post = client.post("/stub/publish")
         assert anon_post.status_code == 302
-        assert anon_post.headers["Location"].endswith("/auth/login?next=/questions/new")
+        assert anon_post.headers["Location"].endswith("/auth/login?next=/stub/publish")
 
         AuthService().register_user(
             username="author_ok",
@@ -310,13 +317,14 @@ class TestAuthWebRoutes:
             data={
                 "email": "author@example.com",
                 "password": "PasswordValida1",
-                "next": "/questions/new",
+                "next": "/stub/publish",
             },
         )
         assert login_resp.status_code == 302
-        assert login_resp.headers["Location"].endswith("/questions/new")
+        assert login_resp.headers["Location"].endswith("/stub/publish")
 
-        auth_post = client.post("/questions/new")
+        # Con sesion activa, el stub devuelve 201 sin ninguna validacion extra.
+        auth_post = client.post("/stub/publish")
         assert auth_post.status_code == 201
         assert auth_post.json == {"created": True}
 
