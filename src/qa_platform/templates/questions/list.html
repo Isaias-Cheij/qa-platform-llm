@@ -1,14 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Preguntas — Plataforma Q&A{% endblock %}
+{% block title %}Preguntas | Plataforma Q&A{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>Preguntas</h1>
+  <div>
+    <h1>Preguntas</h1>
+    <p class="page-header-subtitle">Consultas de la comunidad ordenadas de más reciente a más antigua.</p>
+  </div>
   <a href="{{ url_for('questions.create_question') }}" class="btn btn-primary">Hacer una pregunta</a>
 </div>
 
 {% if questions %}
+  <search class="question-search">
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="5.5"/>
+          <path d="m13 13 4 4" stroke-linecap="round"/>
+        </svg>
+        <input
+          type="search"
+          id="question-filter"
+          class="form-control search-input"
+          placeholder="Filtrar por título, categoría, etiqueta o autor"
+          aria-label="Filtrar preguntas"
+        >
+      </div>
+      <span id="question-filter-status" class="search-count tabular-nums" role="status">
+        {{ questions|length }} {% if questions|length == 1 %}pregunta{% else %}preguntas{% endif %}
+      </span>
+    </div>
+  </search>
+
   <ul class="question-list">
     {% for q in questions %}
     <li class="question-card">
@@ -21,11 +45,15 @@
         {% if tag_list %}
           <span class="meta-tags">
             {% for tag in tag_list %}
-              <span class="tag">{{ tag.name }}</span>
+              <span class="tag">#{{ tag.name }}</span>
             {% endfor %}
           </span>
         {% endif %}
-        <span class="meta-date">{{ q.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+        {% set answer_count = q.answers.count() %}
+        <span class="meta-answers tabular-nums">
+          {{ answer_count }} {% if answer_count == 1 %}respuesta{% else %}respuestas{% endif %}
+        </span>
+        <span class="meta-date tabular-nums">{{ q.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
         {% if q.author %}
           <span class="meta-author">por {{ q.author.display_name }}</span>
         {% endif %}
@@ -33,7 +61,13 @@
     </li>
     {% endfor %}
   </ul>
+
+  <p id="question-filter-empty" class="empty-state" hidden>
+    No se encontraron preguntas que coincidan con tu búsqueda.
+  </p>
 {% else %}
-  <p class="empty-state">Todavia no hay preguntas. <a href="{{ url_for('questions.create_question') }}">Se el primero en preguntar</a>.</p>
+  <p class="empty-state">
+    Todavía no hay preguntas. <a href="{{ url_for('questions.create_question') }}">Sé el primero en preguntar</a>.
+  </p>
 {% endif %}
 {% endblock %}

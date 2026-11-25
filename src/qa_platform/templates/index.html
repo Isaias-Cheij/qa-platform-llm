@@ -1,43 +1,170 @@
 {% extends "base.html" %}
 
-{% block title %}Inicio — Plataforma Q&A{% endblock %}
+{% block title %}Inicio | Plataforma Q&A{% endblock %}
+{% block header_class %}header-nav--overlay{% endblock %}
+{% block flash_class %}flash-container--overlay{% endblock %}
+{% block main_class %}main-container--home{% endblock %}
 
 {% block content %}
-<section class="hero">
-  <h1>Plataforma Colaborativa Q&A</h1>
-  <p>
-    Espacio de intercambio de conocimientos con asistencia de inteligencia artificial
-    para la comunidad de Ingeniería de Software I.
-  </p>
-  <div class="hero-actions">
-    <a href="{{ url_for('questions.list_questions') }}" class="btn btn-primary">Ver Preguntas</a>
-    <a href="{{ url_for('questions.create_question') }}" class="btn btn-secondary">Hacer una Pregunta</a>
+<section class="home-hero">
+  <div class="container home-hero-inner">
+    <h1>Plataforma Colaborativa Q&A</h1>
+    <p class="home-hero-lead">
+      Espacio académico de Ingeniería de Software I para debatir dudas,
+      compartir soluciones y recibir asistencia automática con modelos de lenguaje.
+    </p>
+    <a href="{{ url_for('questions.list_questions') }}" class="btn btn-primary home-hero-cta">
+      Explorar preguntas
+    </a>
+
+    <div class="workflow-stage">
+      <fieldset class="stage-tabs">
+        <legend class="stage-tabs-legend">Etapas del flujo colaborativo</legend>
+        <label class="stage-tab-option">
+          <input type="radio" name="workflow_tab" value="community" checked>
+          <span>Comunidad</span>
+        </label>
+        <label class="stage-tab-option">
+          <input type="radio" name="workflow_tab" value="ai">
+          <span>Asistencia IA</span>
+        </label>
+        <label class="stage-tab-option">
+          <input type="radio" name="workflow_tab" value="accepted">
+          <span>Solución aceptada</span>
+        </label>
+      </fieldset>
+
+      <div class="stage-panels">
+        <div class="stage-panel stage-panel--community">
+          <div class="stage-panel-copy">
+            <h2>Preguntas estructuradas por materia</h2>
+            <p>
+              Cada consulta se organiza por categoría temática y etiquetas para que
+              estudiantes y docentes encuentren respuestas claras sin ruido.
+            </p>
+          </div>
+          <div class="stage-panel-visual">
+            <svg class="stage-diagram" viewBox="0 0 320 150" fill="none" aria-hidden="true">
+              <rect x="12" y="16" width="296" height="36" rx="8" fill="#172e4f" stroke="#3b82f6" stroke-opacity="0.5"/>
+              <circle cx="34" cy="34" r="8" fill="#60a5fa"/>
+              <rect x="52" y="28" width="160" height="12" rx="4" fill="#e2e8f0" fill-opacity="0.85"/>
+              <rect x="12" y="64" width="142" height="70" rx="8" fill="#0f213b" stroke="#ffffff" stroke-opacity="0.16"/>
+              <rect x="26" y="80" width="90" height="10" rx="3" fill="#93c5fd"/>
+              <rect x="26" y="100" width="112" height="8" rx="3" fill="#94a3b8" fill-opacity="0.55"/>
+              <rect x="166" y="64" width="142" height="70" rx="8" fill="#0f213b" stroke="#ffffff" stroke-opacity="0.16"/>
+              <rect x="180" y="80" width="76" height="10" rx="3" fill="#93c5fd"/>
+              <rect x="180" y="100" width="110" height="8" rx="3" fill="#94a3b8" fill-opacity="0.55"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stage-panel stage-panel--ai">
+          <div class="stage-panel-copy">
+            <h2>Motor desacoplado con patrón Strategy</h2>
+            <p>
+              Un agente polimórfico responde automáticamente consultas sin respuesta o
+              etiquetadas para asistencia, intercambiando proveedores LLM sin acoplamiento.
+            </p>
+          </div>
+          <div class="stage-panel-visual">
+            <svg class="stage-diagram" viewBox="0 0 320 150" fill="none" aria-hidden="true">
+              <rect x="14" y="54" width="84" height="42" rx="8" fill="#172e4f" stroke="#60a5fa"/>
+              <rect x="28" y="70" width="56" height="10" rx="3" fill="#e2e8f0"/>
+              <path d="M98 75h34M132 75l24-36M132 75h24M132 75l24 36" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+              <rect x="158" y="22" width="146" height="28" rx="6" fill="#0f213b" stroke="#818cf8"/>
+              <rect x="172" y="32" width="88" height="8" rx="3" fill="#c7d2fe"/>
+              <rect x="158" y="61" width="146" height="28" rx="6" fill="#1e293b" stroke="#ffffff" stroke-opacity="0.22"/>
+              <rect x="172" y="71" width="96" height="8" rx="3" fill="#94a3b8"/>
+              <rect x="158" y="100" width="146" height="28" rx="6" fill="#1e293b" stroke="#ffffff" stroke-opacity="0.22"/>
+              <rect x="172" y="110" width="76" height="8" rx="3" fill="#94a3b8"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stage-panel stage-panel--accepted">
+          <div class="stage-panel-copy">
+            <h2>Validación directa del autor</h2>
+            <p>
+              Quien formula la pregunta destaca la solución verificada para fijarla al
+              inicio del hilo y construir referencia confiable para la cursada.
+            </p>
+          </div>
+          <div class="stage-panel-visual">
+            <svg class="stage-diagram" viewBox="0 0 320 150" fill="none" aria-hidden="true">
+              <rect x="14" y="18" width="292" height="58" rx="8" fill="#0f2d24" stroke="#34d399"/>
+              <circle cx="38" cy="47" r="11" fill="#10b981"/>
+              <path d="m33 47 3.5 3.5L43 44" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="60" y="34" width="140" height="10" rx="3" fill="#d1fae5"/>
+              <rect x="60" y="51" width="210" height="8" rx="3" fill="#6ee7b7" fill-opacity="0.5"/>
+              <rect x="14" y="90" width="292" height="42" rx="8" fill="#0f213b" stroke="#ffffff" stroke-opacity="0.16"/>
+              <rect x="30" y="107" width="160" height="8" rx="3" fill="#94a3b8" fill-opacity="0.5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="features-grid">
-  <article class="card">
-    <h3>Comunidad de Estudiantes</h3>
-    <p>
-      Plantea dudas sobre la materia y participa debatiendo soluciones
-      con tus compañeros a través de votos y comentarios.
-    </p>
-  </article>
+<section class="home-pillars">
+  <div class="container">
+    <header class="section-heading">
+      <h2>Diseñada para estudiar y resolver en equipo</h2>
+      <p>
+        Todo el ciclo de consultas académicas reunido en un flujo claro y verificable.
+      </p>
+    </header>
 
-  <article class="card">
-    <h3>Asistencia con IA</h3>
-    <p>
-      Respuestas automáticas generadas por agentes de lenguaje integrados,
-      diseñados bajo el patrón Strategy para apoyar el aprendizaje.
-    </p>
-  </article>
+    <div class="pillars-grid">
+      <article class="pillar-item">
+        <svg class="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round"/>
+        </svg>
+        <h3>Comunidad de estudiantes</h3>
+        <p>
+          Plantea dudas sobre la materia y participa debatiendo soluciones
+          con tus compañeros en cada hilo de preguntas.
+        </p>
+      </article>
 
-  <article class="card">
-    <h3>Soluciones Aceptadas</h3>
-    <p>
-      El autor de cada consulta puede destacar la respuesta más clara y precisa,
-      sirviendo de referencia para toda la comunidad académica.
-    </p>
-  </article>
+      <article class="pillar-item">
+        <svg class="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <rect x="4" y="4" width="16" height="16" rx="3"/>
+          <path d="M9 9h6v6H9zM9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" stroke-linecap="round"/>
+        </svg>
+        <h3>Asistencia con IA</h3>
+        <p>
+          Respuestas automáticas generadas por agentes de lenguaje integrados
+          bajo el patrón Strategy para apoyar el aprendizaje.
+        </p>
+      </article>
+
+      <article class="pillar-item">
+        <svg class="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round"/>
+          <path d="m9 11 3 3L22 4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Soluciones aceptadas</h3>
+        <p>
+          El autor de cada consulta puede destacar la respuesta más clara y precisa,
+          sirviendo de referencia para toda la comunidad académica.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="home-closing">
+  <div class="container home-closing-inner">
+    <div class="home-closing-copy">
+      <h2>Publica tu primera consulta</h2>
+      <p>Elegí una categoría, detallá el problema y recibí aportes de tus pares.</p>
+    </div>
+    <a href="{{ url_for('questions.create_question') }}" class="btn btn-primary">
+      Hacer una pregunta
+    </a>
+  </div>
 </section>
 {% endblock %}

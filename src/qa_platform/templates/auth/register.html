@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Registrarse — Plataforma Q&A{% endblock %}
+{% block title %}Registrarse | Plataforma Q&A{% endblock %}
 
 {% block content %}
 <section class="auth-card card">
@@ -9,7 +9,7 @@
 
   <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form">
     <div class="form-group">
-      <label for="username">Nombre de usuario <span aria-hidden="true">*</span></label>
+      <label for="username">Nombre de usuario <span class="required" aria-hidden="true">*</span></label>
       <input
         type="text"
         id="username"
@@ -48,7 +48,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email">Correo electrónico <span aria-hidden="true">*</span></label>
+      <label for="email">Correo electrónico <span class="required" aria-hidden="true">*</span></label>
       <input
         type="email"
         id="email"
@@ -56,6 +56,8 @@
         class="form-control"
         value="{{ form_data.get('email', '') }}"
         autocomplete="email"
+        autocorrect="off"
+        autocapitalize="none"
         spellcheck="false"
         maxlength="120"
         enterkeyhint="next"
@@ -68,19 +70,33 @@
     </div>
 
     <div class="form-group">
-      <label for="password">Contraseña <span aria-hidden="true">*</span></label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        class="form-control"
-        autocomplete="new-password"
-        minlength="8"
-        enterkeyhint="next"
-        aria-describedby="password-hint{% if errors.get('password') %} password-error{% endif %}"
-        {% if errors.get('password') %}aria-invalid="true"{% endif %}
-        required
-      >
+      <label for="password">Contraseña <span class="required" aria-hidden="true">*</span></label>
+      <div class="password-field">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          autocomplete="new-password"
+          minlength="8"
+          enterkeyhint="next"
+          aria-describedby="password-hint{% if errors.get('password') %} password-error{% endif %}"
+          {% if errors.get('password') %}aria-invalid="true"{% endif %}
+          required
+        >
+        <button
+          type="button"
+          class="password-toggle"
+          data-target="password"
+          aria-pressed="false"
+          aria-label="Mostrar contraseña"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
       <span id="password-hint" class="form-hint">Mínimo 8 caracteres.</span>
       {% if errors.get('password') %}
         <span id="password-error" class="form-error" role="alert">{{ errors.get('password') }}</span>
