@@ -1,10 +1,73 @@
 """Contrato abstracto del patrón Strategy para proveedores de LLM."""
 
+import json
+import urllib.error
+import urllib.request
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class LLMProviderError(RuntimeError):
     """Error de dominio al comunicarse con un proveedor de LLM."""
+
+
+def validate_prompt(prompt: str) -> str:
+    """Valida que el prompt sea una cadena de texto no vacía y la limpia."""
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError("El prompt debe ser una cadena no vacía.")
+    return prompt.strip()
+
+
+def post_json(
+    url: str,
+    payload: dict[str, Any],
+    *,
+    headers: dict[str, str],
+    timeout: int,
+    provider: str,
+) -> dict[str, Any]:
+    """Envía una petición HTTP POST con cuerpo JSON y devuelve el objeto decodificado.
+
+    Args:
+        url: Endpoint del proveedor LLM.
+        payload: Diccionario serializable a JSON.
+        headers: Encabezados HTTP de la petición.
+        timeout: Tiempo máximo de espera en segundos.
+        provider: Nombre del proveedor para enriquecer los mensajes de error.
+
+    Returns:
+        Diccionario JSON devuelto por el servidor.
+
+    Raises:
+        LLMProviderError: Ante errores de red, timeout o JSON inválido.
+    """
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw_body = resp.read().decode("utf-8")
+            data = json.loads(raw_body)
+    except (
+        urllib.error.URLError,
+        TimeoutError,
+        OSError,
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+    ) as exc:
+        raise LLMProviderError(
+            f"Error al comunicarse con el proveedor {provider}: {exc}"
+        ) from exc
+
+    if not isinstance(data, dict):
+        raise LLMProviderError(
+            f"Respuesta inesperada del proveedor {provider}: "
+            "se esperaba un objeto JSON."
+        )
+    return data
 
 
 class LLMStrategy(ABC):
