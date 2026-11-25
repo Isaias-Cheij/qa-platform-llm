@@ -12,6 +12,12 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TESTING = False
 
+    # Configuración opcional para el servicio de respuestas con LLM.
+    LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    LLM_API_KEY = os.getenv("LLM_API_KEY") or GEMINI_API_KEY or OPENAI_API_KEY
+
 
 class DevelopmentConfig(Config):
     """Configuracion para desarrollo local."""
@@ -26,6 +32,11 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    # En pruebas automatizadas desactivamos las claves reales por defecto para
+    # garantizar el uso del fallback local sin llamadas de red accidentales.
+    OPENAI_API_KEY = None
+    GEMINI_API_KEY = None
+    LLM_API_KEY = None
 
 
 class ProductionConfig(Config):

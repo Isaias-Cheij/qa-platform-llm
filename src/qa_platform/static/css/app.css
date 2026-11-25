@@ -481,6 +481,17 @@
     border-color: var(--success-hover);
   }
 
+  .btn-ai {
+    background-color: var(--ai-soft);
+    color: var(--ai-ink);
+    border-color: var(--ai-border);
+  }
+
+  .btn-ai:hover {
+    background-color: var(--ai-border);
+    color: var(--ai-ink);
+  }
+
   /* Superficie tipo tarjeta */
   .card {
     background-color: var(--bg-surface);
@@ -984,7 +995,8 @@
     border-block-start: 1px solid var(--border-hairline);
   }
 
-  .accept-answer-form {
+  .accept-answer-form,
+  .ai-answer-form {
     display: inline-block;
   }
 
