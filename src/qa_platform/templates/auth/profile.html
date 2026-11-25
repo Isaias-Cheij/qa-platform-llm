@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Mi perfil — Plataforma Q&A{% endblock %}
+{% block title %}Mi perfil | Plataforma Q&A{% endblock %}
 
 {% block content %}
 <section class="auth-card card">
-  <h1>{{ user.display_name }}</h1>
-  <p class="auth-subtitle">Sesión iniciada en Plataforma Q&A</p>
+  <div class="profile-header">
+    <div class="profile-avatar" aria-hidden="true">
+      {{ (user.display_name or user.username)[0]|upper }}
+    </div>
+    <div>
+      <h1>{{ user.display_name }}</h1>
+      <p class="auth-subtitle">Sesión iniciada en Plataforma Q&A</p>
+    </div>
+  </div>
 
   <dl class="profile-details">
     <div class="profile-row">
@@ -18,7 +25,7 @@
     </div>
     <div class="profile-row">
       <dt>Reputación</dt>
-      <dd>{{ user.reputation or 0 }}</dd>
+      <dd class="tabular-nums">{{ user.reputation or 0 }}</dd>
     </div>
     {% if user.academic_level %}
       <div class="profile-row">
@@ -28,8 +35,13 @@
     {% endif %}
   </dl>
 
-  <form action="{{ url_for('auth.logout') }}" method="POST" class="auth-form">
-    <button type="submit" class="btn btn-secondary auth-submit">Cerrar sesión</button>
-  </form>
+  <div class="form-actions">
+    <a href="{{ url_for('questions.create_question') }}" class="btn btn-primary auth-submit">
+      Hacer una pregunta
+    </a>
+    <form action="{{ url_for('auth.logout') }}" method="POST" class="auth-form auth-submit">
+      <button type="submit" class="btn btn-secondary auth-submit">Cerrar sesión</button>
+    </form>
+  </div>
 </section>
 {% endblock %}

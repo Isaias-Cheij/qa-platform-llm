@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Iniciar sesión — Plataforma Q&A{% endblock %}
+{% block title %}Iniciar sesión | Plataforma Q&A{% endblock %}
 
 {% block content %}
 <section class="auth-card card">
@@ -13,7 +13,7 @@
     {% endif %}
 
     <div class="form-group">
-      <label for="email">Correo electrónico <span aria-hidden="true">*</span></label>
+      <label for="email">Correo electrónico <span class="required" aria-hidden="true">*</span></label>
       <input
         type="email"
         id="email"
@@ -21,6 +21,8 @@
         class="form-control"
         value="{{ form_data.get('email', '') }}"
         autocomplete="username"
+        autocorrect="off"
+        autocapitalize="none"
         spellcheck="false"
         enterkeyhint="next"
         {% if errors.get('general') %}aria-invalid="true"{% endif %}
@@ -29,17 +31,31 @@
     </div>
 
     <div class="form-group">
-      <label for="password">Contraseña <span aria-hidden="true">*</span></label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        class="form-control"
-        autocomplete="current-password"
-        enterkeyhint="done"
-        {% if errors.get('general') %}aria-invalid="true"{% endif %}
-        required
-      >
+      <label for="password">Contraseña <span class="required" aria-hidden="true">*</span></label>
+      <div class="password-field">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          autocomplete="current-password"
+          enterkeyhint="done"
+          {% if errors.get('general') %}aria-invalid="true"{% endif %}
+          required
+        >
+        <button
+          type="button"
+          class="password-toggle"
+          data-target="password"
+          aria-pressed="false"
+          aria-label="Mostrar contraseña"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <button type="submit" class="btn btn-primary auth-submit">Iniciar sesión</button>
