@@ -426,6 +426,68 @@ class AIAgent(Author):
             return self._strategy.get_provider_name()
         return type(self._strategy).__name__
 
+    def generate_response(self, prompt: str, context: str = "") -> str:
+        """Delega la generación de texto en la estrategia LLM configurada.
+
+        Combina el ``system_prompt`` del agente (si existe) con el ``context``
+        provisto antes de invocar ``self._strategy.generate_response()``.
+
+        Args:
+            prompt: Consigna o pregunta principal enviada al modelo.
+            context: Información adicional contextual de la consulta.
+
+        Returns:
+            Texto generado por la estrategia LLM activa.
+
+        Raises:
+            RuntimeError: Si el agente no tiene ninguna estrategia inyectada.
+        """
+        if self._strategy is None:
+            raise RuntimeError("El agente IA no tiene una estrategia LLM configurada.")
+
+        context_parts = [
+            part.strip()
+            for part in (self.system_prompt or "", context or "")
+            if isinstance(part, str) and part.strip()
+        ]
+        combined_context = "\n\n".join(context_parts)
+        return self._strategy.generate_response(prompt, combined_context)
+
+    def answer_question(self, question: Any) -> Any:
+        """Construye prompt y contexto desde una ``Question`` y crea un ``Answer``.
+
+        Args:
+            question: Instancia de ``Question`` que se desea responder.
+
+        Returns:
+            Nueva instancia de ``Answer`` asociada a la pregunta y a este
+            agente (sin hacer ``commit`` en base de datos).
+
+        Raises:
+            ValueError: Si ``question`` es ``None``.
+            RuntimeError: Si el agente no tiene estrategia configurada.
+        """
+        if question is None:
+            raise ValueError("Se requiere una pregunta válida para responder.")
+
+        prompt = f"{question.title}\n\n{question.body}".strip()
+
+        context_lines: list[str] = []
+        if getattr(question, "category", None) is not None:
+            context_lines.append(f"Categoría: {question.category.name}")
+        raw_tags = getattr(question, "tags", None)
+        if raw_tags is not None:
+            tag_names = [tag.name for tag in raw_tags]
+            if tag_names:
+                context_lines.append(f"Etiquetas: {', '.join(tag_names)}")
+
+        body = self.generate_response(prompt, context="\n".join(context_lines))
+
+        # Importación local para evitar dependencias circulares con models/answer.py.
+        from qa_platform.models.answer import Answer
+
+        return Answer(body=body, question=question, author=self)
+
     def __repr__(self) -> str:
         """Devuelve una representación legible del agente IA para depuración.
 
