@@ -1,6 +1,5 @@
 """Blueprint web de preguntas: listado, detalle y creacion de preguntas."""
 
-import re
 from typing import Any
 
 from flask import (
@@ -16,56 +15,15 @@ from flask import (
 from qa_platform.extensions import db
 from qa_platform.models.category import Category
 from qa_platform.models.question import Question
-from qa_platform.models.tag import Tag
+from qa_platform.services.question_service import (
+    generate_unique_slug,
+    resolve_or_create_tags,
+    validate_question_fields,
+)
 from qa_platform.web.answers import get_ordered_answers
 from qa_platform.web.auth import login_required
 
 questions_bp = Blueprint("questions", __name__, url_prefix="/questions")
-
-
-def _slugify(text: str) -> str:
-    """Convierte un texto en un slug URL-friendly.
-
-    Convierte a minusculas, elimina caracteres no alfanumericos y reemplaza
-    espacios consecutivos por guiones.
-
-    Args:
-        text: Texto de entrada a convertir.
-
-    Returns:
-        Cadena slug valida para usar en URLs.
-    """
-    text = text.lower().strip()
-    text = re.sub(r"[^\w\s-]", "", text)
-    text = re.sub(r"[\s_]+", "-", text)
-    text = re.sub(r"-+", "-", text)
-    return text[:170]
-
-
-def _resolve_or_create_tags(raw_tags: str) -> list[Tag]:
-    """Resuelve la lista de etiquetas desde una cadena separada por comas.
-
-    Para cada nombre de etiqueta, busca en la BD una existente con ese slug;
-    si no existe, la crea. Esto evita duplicados silenciosos.
-
-    Args:
-        raw_tags: Cadena de etiquetas separadas por comas (ej: "python, flask").
-
-    Returns:
-        Lista de instancias de ``Tag`` listas para asociar a una pregunta.
-    """
-    tags: list[Tag] = []
-    for name in raw_tags.split(","):
-        name = name.strip()
-        if not name:
-            continue
-        slug = _slugify(name)[:35]
-        tag = db.session.scalar(db.select(Tag).filter_by(slug=slug))
-        if tag is None:
-            tag = Tag(name=name[:30], slug=slug)
-            db.session.add(tag)
-        tags.append(tag)
-    return tags
 
 
 @questions_bp.get("/")
@@ -129,36 +87,15 @@ def create_question() -> Any:
         raw_tags = request.form.get("tags", "").strip()
         category_id_raw = request.form.get("category_id", "")
 
-        errors: dict[str, str] = {}
-
-        if len(title) < 5:
-            errors["title"] = "El titulo debe tener al menos 5 caracteres."
-        if len(title) > 150:
-            errors["title"] = "El titulo no puede superar los 150 caracteres."
-        if not body:
-            errors["body"] = "El contenido de la pregunta es obligatorio."
-        if not category_id_raw:
-            errors["category_id"] = "Debes seleccionar una categoria."
-
-        category_id: int | None = None
-        if category_id_raw:
-            try:
-                category_id = int(category_id_raw)
-            except ValueError:
-                errors["category_id"] = "Categoria invalida."
+        errors, category_id = validate_question_fields(
+            title=title,
+            body=body,
+            category_id_raw=category_id_raw,
+        )
 
         if not errors:
-            # Generar slug base desde el titulo y garantizar unicidad.
-            base_slug = _slugify(title)
-            slug = base_slug
-            suffix = 1
-            while (
-                db.session.scalar(db.select(Question).filter_by(slug=slug)) is not None
-            ):
-                slug = f"{base_slug}-{suffix}"
-                suffix += 1
-
-            tags = _resolve_or_create_tags(raw_tags)
+            slug = generate_unique_slug(title)
+            tags = resolve_or_create_tags(raw_tags)
             question = Question(
                 title=title,
                 slug=slug,
@@ -232,23 +169,11 @@ def edit_question(slug: str) -> Any:
         raw_tags = request.form.get("tags", "").strip()
         category_id_raw = request.form.get("category_id", "")
 
-        errors: dict[str, str] = {}
-
-        if len(title) < 5:
-            errors["title"] = "El titulo debe tener al menos 5 caracteres."
-        if len(title) > 150:
-            errors["title"] = "El titulo no puede superar los 150 caracteres."
-        if not body:
-            errors["body"] = "El contenido de la pregunta es obligatorio."
-        if not category_id_raw:
-            errors["category_id"] = "Debes seleccionar una categoria."
-
-        category_id: int | None = None
-        if category_id_raw:
-            try:
-                category_id = int(category_id_raw)
-            except ValueError:
-                errors["category_id"] = "Categoria invalida."
+        errors, category_id = validate_question_fields(
+            title=title,
+            body=body,
+            category_id_raw=category_id_raw,
+        )
 
         if not errors:
             question.title = title
@@ -256,7 +181,7 @@ def edit_question(slug: str) -> Any:
             question.category_id = category_id
 
             # Reemplazar coleccion de tags en su totalidad.
-            new_tags = _resolve_or_create_tags(raw_tags)
+            new_tags = resolve_or_create_tags(raw_tags)
             existing = list(question.tags)
             for t in existing:
                 question.tags.remove(t)
