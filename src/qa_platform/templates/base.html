@@ -5,17 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Plataforma Q&A{% endblock %}</title>
 
-  <!-- Hoja de estilos principal vinculada dinámicamente -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
   {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-  <!-- Barra de navegación superior compartida -->
-  <header class="header-nav">
+  <header class="header-nav {% block header_class %}{% endblock %}">
     <div class="container nav-content">
-      <a href="{{ url_for('index') }}" class="brand-logo">Plataforma Q&A</a>
-      <nav class="nav-links">
+      <a href="{{ url_for('index') }}" class="brand-logo">
+        <svg class="brand-mark" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect x="2" y="2" width="24" height="24" rx="6" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M9 11.5C9 9.567 10.567 8 12.5 8h3C17.433 8 19 9.567 19 11.5c0 1.43-.857 2.66-2.087 3.204L14.5 15.8V17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="14.5" cy="20.25" r="1.25" fill="currentColor"/>
+        </svg>
+        <span>Plataforma Q&A</span>
+      </a>
+
+      <button
+        type="button"
+        class="nav-toggle"
+        aria-expanded="false"
+        aria-controls="primary-nav"
+        aria-label="Abrir menú de navegación"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <nav id="primary-nav" class="nav-links" aria-label="Principal">
         <a href="{{ url_for('index') }}" class="nav-item">Inicio</a>
         <a href="{{ url_for('questions.list_questions') }}" class="nav-item">Preguntas</a>
         <a href="{{ url_for('questions.create_question') }}" class="nav-item">Nueva pregunta</a>
@@ -32,29 +54,42 @@
     </div>
   </header>
 
-  <!-- Mensajes de notificación / flash de Flask -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div class="container flash-container">
+      <div class="container flash-container {% block flash_class %}{% endblock %}">
         {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">{{ message }}</div>
+          <div class="alert alert-{{ category }}" role="{% if category == 'danger' %}alert{% else %}status{% endif %}">
+            <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              {% if category == 'success' %}
+                <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.707-9.293a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4Z" clip-rule="evenodd"/>
+              {% elif category == 'danger' %}
+                <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd"/>
+              {% else %}
+                <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd"/>
+              {% endif %}
+            </svg>
+            <span>{{ message }}</span>
+          </div>
         {% endfor %}
       </div>
     {% endif %}
   {% endwith %}
 
-  <!-- Bloque principal de contenido a sobrescribir por cada vista -->
-  <main class="container main-container">
+  <main id="main-content" tabindex="-1" class="container main-container {% block main_class %}{% endblock %}">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Pie de página de la aplicación -->
   <footer class="footer">
     <div class="container footer-content">
-      <p>&copy; 2026 Plataforma Q&A — Ingeniería de Software I (UNRC)</p>
+      <p>&copy; 2026 Plataforma Q&A · Ingeniería de Software I (UNRC)</p>
+      <div class="footer-links">
+        <a href="{{ url_for('questions.list_questions') }}">Preguntas</a>
+        <a href="{{ url_for('questions.create_question') }}">Nueva pregunta</a>
+      </div>
     </div>
   </footer>
 
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

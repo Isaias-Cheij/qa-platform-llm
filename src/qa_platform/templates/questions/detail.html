@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ question.title }} — Plataforma Q&A{% endblock %}
+{% block title %}{{ question.title }} | Plataforma Q&A{% endblock %}
 
 {% block content %}
 <article class="question-detail">
@@ -12,20 +12,18 @@
       {% if tag_list %}
         <span class="meta-tags">
           {% for tag in tag_list %}
-            <span class="tag">{{ tag.name }}</span>
+            <span class="tag">#{{ tag.name }}</span>
           {% endfor %}
         </span>
       {% endif %}
-      <span class="meta-date">{{ question.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+      <span class="meta-date tabular-nums">{{ question.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
       {% if question.author %}
         <span class="meta-author">por {{ question.author.display_name }}</span>
       {% endif %}
     </div>
   </header>
 
-  <div class="question-body">
-    {{ question.body }}
-  </div>
+  <div class="question-body">{{ question.body }}</div>
 
   <div class="question-actions">
     <a href="{{ url_for('questions.list_questions') }}" class="btn btn-secondary">Volver al listado</a>
@@ -36,7 +34,7 @@
 </article>
 
 <section class="answers-section">
-  <h2>Respuestas ({{ answers|length }})</h2>
+  <h2 class="tabular-nums">Respuestas ({{ answers|length }})</h2>
 
   {% if answers %}
     <div class="answer-list">
@@ -52,8 +50,8 @@
                 <span class="badge-ai">IA</span>
               {% endif %}
             </span>
-            <span class="meta-date">{{ answer.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
-            <span class="answer-score">Puntaje: {{ answer.calculate_score() }}</span>
+            <span class="meta-date tabular-nums">{{ answer.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+            <span class="answer-score tabular-nums">Puntaje: {{ answer.calculate_score() }}</span>
           </div>
 
           <div class="answer-body">{{ answer.body }}</div>
@@ -86,10 +84,10 @@
           rows="5"
           class="form-control"
           required
-          {% if answer_errors and answer_errors.get('body') %}aria-invalid="true"{% endif %}
+          {% if answer_errors and answer_errors.get('body') %}aria-invalid="true" aria-describedby="answer-body-error"{% endif %}
         >{{ answer_body or '' }}</textarea>
         {% if answer_errors and answer_errors.get('body') %}
-          <span class="form-error">{{ answer_errors.get('body') }}</span>
+          <span id="answer-body-error" class="form-error" role="alert">{{ answer_errors.get('body') }}</span>
         {% endif %}
       </div>
       <button type="submit" class="btn btn-primary">Publicar respuesta</button>

@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Nueva pregunta — Plataforma Q&A{% endblock %}
+{% block title %}Nueva pregunta | Plataforma Q&A{% endblock %}
 
 {% block content %}
 <div class="form-page">
   <h1>Hacer una pregunta</h1>
+  <p class="form-page-subtitle">Describí tu consulta con contexto claro para recibir respuestas útiles.</p>
 
-  <form method="POST" action="{{ url_for('questions.create_question') }}" novalidate>
+  <form method="POST" action="{{ url_for('questions.create_question') }}" class="form-card" novalidate>
     <div class="form-group {% if errors.title %}has-error{% endif %}">
-      <label for="title">Titulo <span class="required">*</span></label>
+      <label for="title">Título <span class="required" aria-hidden="true">*</span></label>
       <input
         type="text"
         id="title"
@@ -17,16 +18,23 @@
         value="{{ form_data.get('title', '') }}"
         required
         class="form-control"
+        {% if errors.title %}aria-invalid="true" aria-describedby="title-error"{% endif %}
       >
       {% if errors.title %}
-        <span class="error-msg">{{ errors.title }}</span>
+        <span id="title-error" class="error-msg" role="alert">{{ errors.title }}</span>
       {% endif %}
     </div>
 
     <div class="form-group {% if errors.category_id %}has-error{% endif %}">
-      <label for="category_id">Categoria <span class="required">*</span></label>
-      <select id="category_id" name="category_id" required class="form-control">
-        <option value="">-- Selecciona una categoria --</option>
+      <label for="category_id">Categoría <span class="required" aria-hidden="true">*</span></label>
+      <select
+        id="category_id"
+        name="category_id"
+        required
+        class="form-control"
+        {% if errors.category_id %}aria-invalid="true" aria-describedby="category-error"{% endif %}
+      >
+        <option value="">Selecciona una categoría</option>
         {% for cat in categories %}
           <option value="{{ cat.id }}" {% if form_data.get('category_id')|string == cat.id|string %}selected{% endif %}>
             {{ cat.name }}
@@ -34,21 +42,22 @@
         {% endfor %}
       </select>
       {% if errors.category_id %}
-        <span class="error-msg">{{ errors.category_id }}</span>
+        <span id="category-error" class="error-msg" role="alert">{{ errors.category_id }}</span>
       {% endif %}
     </div>
 
     <div class="form-group {% if errors.body %}has-error{% endif %}">
-      <label for="body">Contenido <span class="required">*</span></label>
+      <label for="body">Contenido <span class="required" aria-hidden="true">*</span></label>
       <textarea
         id="body"
         name="body"
         rows="10"
         required
         class="form-control"
+        {% if errors.body %}aria-invalid="true" aria-describedby="body-error"{% endif %}
       >{{ form_data.get('body', '') }}</textarea>
       {% if errors.body %}
-        <span class="error-msg">{{ errors.body }}</span>
+        <span id="body-error" class="error-msg" role="alert">{{ errors.body }}</span>
       {% endif %}
     </div>
 
