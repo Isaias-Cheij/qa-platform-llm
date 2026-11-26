@@ -12,11 +12,14 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TESTING = False
 
-    # Configuración opcional para el servicio de respuestas con LLM.
-    LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    # Proveedor LLM activo y credenciales por defecto (Twelve-Factor via env).
+    LLM_PROVIDER = os.getenv("LLM_PROVIDER", "mock")
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    LLM_API_KEY = os.getenv("LLM_API_KEY") or GEMINI_API_KEY or OPENAI_API_KEY
+    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    LOCAL_LLM_URL = os.getenv("LOCAL_LLM_URL", "http://localhost:11434/api/generate")
+    LOCAL_LLM_MODEL = os.getenv("LOCAL_LLM_MODEL", "llama3")
 
 
 class DevelopmentConfig(Config):
@@ -32,11 +35,10 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    # En pruebas automatizadas desactivamos las claves reales por defecto para
-    # garantizar el uso del fallback local sin llamadas de red accidentales.
-    OPENAI_API_KEY = None
+    # En pruebas automatizadas garantizamos el proveedor Mock y sin API keys.
+    LLM_PROVIDER = "mock"
     GEMINI_API_KEY = None
-    LLM_API_KEY = None
+    OPENAI_API_KEY = None
 
 
 class ProductionConfig(Config):

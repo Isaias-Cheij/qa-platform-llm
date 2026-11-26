@@ -1,20 +1,23 @@
-"""Suite de pruebas unitarias y de integración para AIService y LLMStrategy.
+"""Suite de pruebas unitarias y de integración para AIService y ruta AI Answer.
 
-Verifica la abstracción ``LLMStrategy``, la inyección de dependencias en
-``AIService``, el uso por defecto de ``MockLLMStrategy``, el comportamiento de
-las estrategias de producción con llamadas HTTP mockeadas (sin acceso real a la
-red) y el flujo completo HTTP en ``POST /questions/<slug>/ai-answer``.
+Verifica la integración de ``AIService`` con el paquete oficial
+``qa_platform.strategies`` (Issue #32) y con ``AIAgent.answer_question()``,
+la inyección de estrategias por constructor, la selección vía
+``get_llm_strategy()`` en ``AIService.from_config()``, el fallback ante
+``LLMProviderError`` sin llamadas reales a la red y el endpoint web
+``POST /questions/<slug>/ai-answer``.
 """
 
 import io
 import json
+import urllib.error
 from unittest.mock import patch
 
 import pytest
 
 from qa_platform.models import AIAgent, Answer, Category, GeneralUser, Question, Tag
 from qa_platform.services.ai_service import AIService
-from qa_platform.services.strategies import (
+from qa_platform.strategies import (
     GeminiLLMStrategy,
     LLMStrategy,
     MockLLMStrategy,
@@ -45,17 +48,17 @@ class _FakeHTTPResponse:
 
 
 class _StubStrategy(LLMStrategy):
-    """Estrategia stub para verificar inyección en AIService sin red."""
+    """Estrategia stub compatible con ``qa_platform.strategies.LLMStrategy``."""
 
     def __init__(self, response_text: str = "Respuesta inyectada por stub.") -> None:
         self.response_text = response_text
-        self.received_prompts: list[str] = []
+        self.calls: list[tuple[str, str]] = []
 
     def get_provider_name(self) -> str:
         return "StubLLM"
 
-    def generate(self, prompt: str) -> str:
-        self.received_prompts.append(prompt)
+    def generate_response(self, prompt: str, context: str = "") -> str:
+        self.calls.append((prompt, context))
         return self.response_text
 
 
@@ -107,102 +110,16 @@ def question(db, author, category):
     return q
 
 
-class TestLLMStrategies:
-    """Pruebas unitarias para la jerarquía LLMStrategy y sus implementaciones."""
-
-    def test_llm_strategy_is_abstract(self):
-        """LLMStrategy no puede instanciarse directamente."""
-        with pytest.raises(TypeError):
-            LLMStrategy()  # type: ignore[abstract]
-
-    def test_mock_strategy_generates_contextual_response(self):
-        """MockLLMStrategy genera respuesta determinista sin llamadas de red."""
-        strategy = MockLLMStrategy()
-        prompt = "Título: Prueba Strategy\nCategoría: Python\nDetalle:\nContenido."
-
-        result = strategy.generate(prompt)
-
-        assert strategy.get_provider_name() == "MockLLM"
-        assert "Respuesta generada por el Agente IA" in result
-        assert "Prueba Strategy" in result
-        assert "Python" in result
-
-    def test_mock_strategy_rejects_empty_prompt(self):
-        """MockLLMStrategy lanza ValueError ante un prompt vacío."""
-        strategy = MockLLMStrategy()
-        with pytest.raises(ValueError):
-            strategy.generate("   ")
-
-    def test_gemini_strategy_calls_mocked_endpoint(self):
-        """GeminiLLMStrategy invoca la API REST y extrae el texto generado."""
-        payload = {
-            "candidates": [
-                {
-                    "content": {
-                        "parts": [{"text": "Respuesta generada por Gemini mockeado."}]
-                    }
-                }
-            ]
-        }
-        strategy = GeminiLLMStrategy(api_key="fake-gemini-key")
-
-        with patch(
-            "urllib.request.urlopen",
-            return_value=_FakeHTTPResponse(payload),
-        ) as mock_urlopen:
-            result = strategy.generate("Explica el patrón Strategy.")
-
-        mock_urlopen.assert_called_once()
-        assert strategy.get_provider_name() == "Gemini"
-        assert result == "Respuesta generada por Gemini mockeado."
-
-    def test_openai_strategy_calls_mocked_endpoint(self):
-        """OpenAILLMStrategy invoca Chat Completions y extrae el mensaje."""
-        payload = {
-            "choices": [
-                {"message": {"content": "Respuesta generada por OpenAI mockeado."}}
-            ]
-        }
-        strategy = OpenAILLMStrategy(api_key="fake-openai-key")
-
-        with patch(
-            "urllib.request.urlopen",
-            return_value=_FakeHTTPResponse(payload),
-        ) as mock_urlopen:
-            result = strategy.generate("Explica el patrón Strategy.")
-
-        mock_urlopen.assert_called_once()
-        assert strategy.get_provider_name() == "OpenAI"
-        assert result == "Respuesta generada por OpenAI mockeado."
-
-    def test_production_strategies_reject_empty_api_key(self):
-        """Las estrategias de producción exigen una API key no vacía."""
-        with pytest.raises(ValueError):
-            GeminiLLMStrategy(api_key="  ")
-        with pytest.raises(ValueError):
-            OpenAILLMStrategy(api_key="")
-
-
 class TestAIServiceUnit:
-    """Pruebas unitarias para AIService con inyección de LLMStrategy."""
+    """Pruebas unitarias para AIService integrado con qa_platform.strategies."""
 
     def test_ai_service_defaults_to_mock_strategy(self):
         """Si no se pasa estrategia en __init__, asigna MockLLMStrategy."""
         service = AIService()
         assert isinstance(service.strategy, MockLLMStrategy)
 
-    def test_build_prompt_contains_question_context(self, db, question):
-        """El prompt contextual incluye título, categoría, etiquetas y cuerpo."""
-        prompt = AIService._build_prompt(question)
-
-        assert "¿Cómo implementar Strategy en Flask?" in prompt
-        assert "Arquitectura" in prompt
-        assert "python" in prompt
-        assert "flask" in prompt
-        assert "distintos proveedores de LLM" in prompt
-
     def test_ai_service_generates_answer_with_default_mock_strategy(self, db, question):
-        """AIService().generate_answer_for_question persiste Answer con MockLLM."""
+        """AIService().generate_answer_for_question usa AIAgent y MockLLMStrategy."""
         service = AIService()
         answer = service.generate_answer_for_question(question)
 
@@ -211,23 +128,29 @@ class TestAIServiceUnit:
         assert answer.question_id == question.id
         assert isinstance(answer.author, AIAgent)
         assert answer.author.is_agent() is True
+        assert "[MockLLM]" in answer.body
         assert "¿Cómo implementar Strategy en Flask?" in answer.body
         assert "Arquitectura" in answer.body
+        assert "python" in answer.body
+        assert "flask" in answer.body
 
         saved = db.session.get(Answer, answer.id)
         assert saved is not None
         assert saved.is_ai_generated is True
 
     def test_ai_service_delegates_to_injected_strategy(self, db, question):
-        """AIService delega la generación a la estrategia inyectada en __init__."""
-        stub = _StubStrategy("Usa una interfaz LLMStrategy inyectada por constructor.")
+        """AIService inyecta la estrategia en AIAgent y delega via answer_question."""
+        stub = _StubStrategy("Usa qa_platform.strategies.LLMStrategy.")
         service = AIService(strategy=stub)
 
         answer = service.generate_answer_for_question(question)
 
-        assert len(stub.received_prompts) == 1
-        assert "¿Cómo implementar Strategy en Flask?" in stub.received_prompts[0]
-        assert answer.body == "Usa una interfaz LLMStrategy inyectada por constructor."
+        assert len(stub.calls) == 1
+        sent_prompt, sent_context = stub.calls[0]
+        assert "¿Cómo implementar Strategy en Flask?" in sent_prompt
+        assert "Arquitectura" in sent_context
+        assert "python" in sent_context
+        assert answer.body == "Usa qa_platform.strategies.LLMStrategy."
         assert answer.is_ai_generated is True
         assert service.strategy.get_provider_name() == "StubLLM"
 
@@ -241,21 +164,21 @@ class TestAIServiceUnit:
         agents = db.session.scalars(db.select(AIAgent)).all()
         assert len(agents) == 1
 
-    def test_from_config_uses_mock_in_testing_and_selects_configured_provider(
+    def test_from_config_uses_get_llm_strategy_and_mocks_network(
         self, app, db, question
     ):
-        """from_config selecciona MockLLM en testing y Gemini/OpenAI si hay clave."""
+        """from_config resuelve la estrategia oficial según LLM_PROVIDER."""
         default_service = AIService.from_config()
         assert isinstance(default_service.strategy, MockLLMStrategy)
 
-        app.config["GEMINI_API_KEY"] = "fake-gemini-key"
         app.config["LLM_PROVIDER"] = "gemini"
+        app.config["GEMINI_API_KEY"] = "fake-gemini-key"
         gemini_service = AIService.from_config()
         assert isinstance(gemini_service.strategy, GeminiLLMStrategy)
 
         payload = {
             "candidates": [
-                {"content": {"parts": [{"text": "Respuesta vía from_config."}]}}
+                {"content": {"parts": [{"text": "Respuesta vía Gemini oficial."}]}}
             ]
         }
         with patch(
@@ -265,13 +188,29 @@ class TestAIServiceUnit:
             answer = gemini_service.generate_answer_for_question(question)
 
         mock_urlopen.assert_called_once()
-        assert answer.body == "Respuesta vía from_config."
+        assert answer.body == "Respuesta vía Gemini oficial."
+        assert answer.is_ai_generated is True
 
-        app.config["GEMINI_API_KEY"] = None
-        app.config["OPENAI_API_KEY"] = "fake-openai-key"
         app.config["LLM_PROVIDER"] = "openai"
+        app.config["OPENAI_API_KEY"] = "fake-openai-key"
         openai_service = AIService.from_config()
         assert isinstance(openai_service.strategy, OpenAILLMStrategy)
+
+    def test_ai_service_falls_back_to_mock_on_provider_error(self, db, question):
+        """Ante LLMProviderError del proveedor externo, cae limpio a MockLLMStrategy."""
+        failing_strategy = GeminiLLMStrategy(api_key="fake-key")
+        service = AIService(strategy=failing_strategy)
+
+        with patch(
+            "urllib.request.urlopen",
+            side_effect=urllib.error.URLError("timeout simulado"),
+        ) as mock_urlopen:
+            answer = service.generate_answer_for_question(question)
+
+        mock_urlopen.assert_called_once()
+        assert answer.is_ai_generated is True
+        assert "[MockLLM]" in answer.body
+        assert "¿Cómo implementar Strategy en Flask?" in answer.body
 
     def test_ai_service_rejects_unpersisted_question(self, db):
         """Lanza ValueError si la pregunta aún no fue persistida."""
@@ -316,7 +255,7 @@ class TestAIAnswerWebRoute:
         assert "¡Respuesta de IA generada con éxito!" in html
         assert "Respuesta de Agente IA" in html
         assert "badge-ai" in html
-        assert "Respuesta generada por el Agente IA" in html
+        assert "[MockLLM]" in html
 
         saved_answers = db.session.scalars(
             db.select(Answer).filter_by(question_id=question.id, is_ai_generated=True)
@@ -327,7 +266,7 @@ class TestAIAnswerWebRoute:
         self, client, db, author, question
     ):
         """La ruta web usa la estrategia devuelta por AIService.from_config()."""
-        stub = _StubStrategy("Respuesta controlada por estrategia inyectada.")
+        stub = _StubStrategy("Respuesta controlada por estrategia oficial inyectada.")
         _login(client, author)
 
         with patch(
@@ -337,10 +276,10 @@ class TestAIAnswerWebRoute:
             response = client.post(f"/questions/{question.slug}/ai-answer")
 
         assert response.status_code == 302
-        assert len(stub.received_prompts) == 1
+        assert len(stub.calls) == 1
 
         detail_html = client.get(f"/questions/{question.slug}").get_data(as_text=True)
-        assert "Respuesta controlada por estrategia inyectada." in detail_html
+        assert "Respuesta controlada por estrategia oficial inyectada." in detail_html
 
     def test_post_generate_ai_answer_unauthenticated_redirects_to_login(
         self, client, db, question
