@@ -9,7 +9,7 @@ from qa_platform.strategies.base import (
     validate_prompt,
 )
 
-DEFAULT_GEMINI_MODEL = "gemini-2.0-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
 
 
 class GeminiLLMStrategy(LLMStrategy):
@@ -20,8 +20,8 @@ class GeminiLLMStrategy(LLMStrategy):
         *,
         api_key: str | None = None,
         model: str | None = None,
-        max_tokens: int = 1024,
-        timeout: int = 15,
+        max_tokens: int = 2048,
+        timeout: int = 45,
     ) -> None:
         """Inicializa la estrategia de Gemini leyendo credenciales del entorno.
 
@@ -90,8 +90,14 @@ class GeminiLLMStrategy(LLMStrategy):
 
         candidates = data.get("candidates") or []
         parts = candidates[0].get("content", {}).get("parts", []) if candidates else []
-        text = parts[0].get("text", "") if parts else ""
-        clean_text = str(text).strip()
+        text_parts = [
+            str(part.get("text", "")).strip()
+            for part in parts
+            if isinstance(part, dict)
+            and not part.get("thought")
+            and str(part.get("text", "")).strip()
+        ]
+        clean_text = "\n".join(text_parts).strip()
         if not clean_text:
             raise LLMProviderError("El proveedor Gemini devolvió una respuesta vacía.")
         return clean_text

@@ -49,6 +49,12 @@ class Answer(db.Model):
         index=True,
     )
     is_accepted = db.Column(db.Boolean, nullable=False, default=False)
+    is_ai_generated = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+        server_default=db.false(),
+    )
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -82,6 +88,7 @@ class Answer(db.Model):
         *,
         body: str,
         is_accepted: bool = False,
+        is_ai_generated: bool | None = None,
         **kwargs: Any,
     ) -> None:
         """Inicializa una respuesta validando que el cuerpo no esté vacío.
@@ -89,6 +96,8 @@ class Answer(db.Model):
         Args:
             body: Texto de la respuesta.
             is_accepted: Estado inicial de aceptación (por defecto ``False``).
+            is_ai_generated: Indica si la respuesta fue generada por IA. Si se
+                omite, se infiere a partir de ``author.is_agent()``.
             **kwargs: Argumentos adicionales para SQLAlchemy (ej. ``question``,
                 ``question_id``, ``author``, ``author_id``).
 
@@ -99,9 +108,20 @@ class Answer(db.Model):
             raise ValueError("El cuerpo de la respuesta debe ser una cadena no vacía.")
         clean_body = body.strip()
 
+        if is_ai_generated is None:
+            author = kwargs.get("author")
+            resolved_is_ai = (
+                bool(author.is_agent())
+                if author is not None and hasattr(author, "is_agent")
+                else False
+            )
+        else:
+            resolved_is_ai = bool(is_ai_generated)
+
         super().__init__(
             body=clean_body,
             is_accepted=is_accepted,
+            is_ai_generated=resolved_is_ai,
             **kwargs,
         )
 

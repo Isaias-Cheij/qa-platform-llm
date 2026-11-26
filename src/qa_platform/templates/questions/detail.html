@@ -30,6 +30,11 @@
     {% if current_user and question.user_id == current_user.id %}
       <a href="{{ url_for('questions.edit_question', slug=question.slug) }}" class="btn btn-secondary">Editar</a>
     {% endif %}
+    {% if current_user %}
+      <form action="{{ url_for('questions.generate_ai_answer', slug=question.slug) }}" method="post" class="ai-answer-form">
+        <button type="submit" class="btn btn-ai">🤖 Generar Respuesta con IA</button>
+      </form>
+    {% endif %}
   </div>
 </article>
 
@@ -46,8 +51,8 @@
             {% endif %}
             <span class="meta-author">
               {{ answer.author.display_name }}
-              {% if answer.author.is_agent() %}
-                <span class="badge-ai">IA</span>
+              {% if answer.is_ai_generated or (answer.author and answer.author.is_agent()) %}
+                <span class="badge-ai badge bg-info text-dark">🤖 Respuesta de Agente IA</span>
               {% endif %}
             </span>
             <span class="meta-date tabular-nums">{{ answer.created_at.strftime('%d/%m/%Y %H:%M') }}</span>

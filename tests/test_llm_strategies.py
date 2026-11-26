@@ -108,7 +108,7 @@ class TestConcreteLLMStrategies:
             ]
         }
         strategy = GeminiLLMStrategy(
-            api_key="fake-gemini-key", model="gemini-2.0-flash"
+            api_key="fake-gemini-key", model="gemini-3.5-flash-lite"
         )
         assert strategy.get_provider_name() == "Gemini"
 
@@ -122,7 +122,7 @@ class TestConcreteLLMStrategies:
 
         assert result == "Usa composición e interfaces ABC."
         req = mock_open.call_args[0][0]
-        assert "gemini-2.0-flash:generateContent" in req.full_url
+        assert "gemini-3.5-flash-lite:generateContent" in req.full_url
         assert req.get_header("X-goog-api-key") == "fake-gemini-key"
         sent_body = json.loads(req.data.decode("utf-8"))
         text_sent = sent_body["contents"][0]["parts"][0]["text"]
@@ -150,6 +150,30 @@ class TestConcreteLLMStrategies:
             pytest.raises(LLMProviderError),
         ):
             strategy.generate_response("Hola")
+
+    def test_gemini_strategy_ignores_thought_parts(self):
+        """Filtra bloques internos de razonamiento (thought=True) de Gemini."""
+        fake_payload = {
+            "candidates": [
+                {
+                    "content": {
+                        "parts": [
+                            {"thought": True, "text": "razonamiento interno"},
+                            {"text": "Respuesta final clara."},
+                        ]
+                    }
+                }
+            ]
+        }
+        strategy = GeminiLLMStrategy(api_key="fake-gemini-key")
+
+        with patch(
+            "urllib.request.urlopen",
+            return_value=_FakeHTTPResponse(fake_payload),
+        ):
+            result = strategy.generate_response("¿Cuánto es 2+2?")
+
+        assert result == "Respuesta final clara."
 
     def test_openai_strategy_requires_api_key(self, monkeypatch):
         """OpenAILLMStrategy exige OPENAI_API_KEY válida al instanciarse."""

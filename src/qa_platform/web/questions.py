@@ -15,6 +15,7 @@ from flask import (
 from qa_platform.extensions import db
 from qa_platform.models.category import Category
 from qa_platform.models.question import Question
+from qa_platform.services.ai_service import AIService
 from qa_platform.services.question_service import (
     generate_unique_slug,
     resolve_or_create_tags,
@@ -224,3 +225,24 @@ def edit_question(slug: str) -> Any:
         form_data=form_data,
         errors={},
     )
+
+
+@questions_bp.post("/<slug>/ai-answer")
+@login_required
+def generate_ai_answer(slug: str) -> Any:
+    """Genera y guarda una respuesta automática del Agente IA para una pregunta.
+
+    Args:
+        slug: Slug único de la pregunta a responder.
+
+    Returns:
+        Redirección al detalle de la pregunta tras persistir la respuesta,
+        o HTTP 404 si la pregunta no existe.
+    """
+    question = db.session.scalar(db.select(Question).filter_by(slug=slug))
+    if question is None:
+        return render_template("404.html"), 404
+
+    AIService.from_config().generate_answer_for_question(question)
+    flash("¡Respuesta de IA generada con éxito!", "success")
+    return redirect(url_for("questions.question_detail", slug=question.slug))
